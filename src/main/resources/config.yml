@@ -1,0 +1,49 @@
+# ───────────────────────────────────────────────────────────────
+#  HyperEconomyBridge
+#  Balances are held in memory and flushed in batches. Nothing in
+#  the read path touches SQL, so /balance costs no main-thread I/O.
+# ───────────────────────────────────────────────────────────────
+
+economy:
+  # Credited once, on first join only.
+  starting-balance: 100.0
+
+  # Upper bound for a single /pay. Blocks fat-finger and dupe-abuse transfers.
+  max-transfer: 1000000.0
+
+  # Minimum delay between /pay uses, per player.
+  pay-cooldown-ms: 1000
+
+  # Append every delta to hypereco_journal. Keep enabled: without it a dupe
+  # report cannot be traced after the fact.
+  journal-transactions: true
+
+storage:
+  # sqlite | mysql
+  #   sqlite - single node, zero setup
+  #   mysql  - required when several servers share one economy
+  type: sqlite
+
+  # Flush cadence for dirty balances. 600 ticks = 30s.
+  # Lower costs more I/O; higher widens the crash-loss window.
+  flush-interval-ticks: 600
+
+  connection-timeout-ms: 5000
+
+  mysql:
+    host: 127.0.0.1
+    port: 3306
+    database: minecraft
+    username: minecraft
+    password: ''
+    pool-size: 10
+
+redis:
+  # Only needed for multi-server deployments. Carries balance invalidation,
+  # never balances themselves, so an outage degrades rather than corrupts.
+  enabled: false
+  host: 127.0.0.1
+  port: 6379
+  password: ''
+  timeout-ms: 2000
+  pool-size: 8
