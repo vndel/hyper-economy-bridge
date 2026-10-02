@@ -1,0 +1,36 @@
+name: HyperEconomyBridge
+version: '${project.version}'
+main: com.fivemcodehub.hypereco.HyperEconomyPlugin
+api-version: '1.20'
+authors: [vndel]
+description: High-throughput async economy engine with Redis write-behind cache
+website: https://team.fivemcodehub.com
+
+commands:
+  balance:
+    description: Show a player balance
+    usage: /balance [player]
+    aliases: [bal, money]
+    permission: hypereco.balance
+  pay:
+    description: Transfer funds to another player
+    usage: /pay <player> <amount>
+    permission: hypereco.pay
+  ecoadmin:
+    description: Administrative economy operations
+    usage: /ecoadmin <give|take|set|reload> [args]
+    permission: hypereco.admin
+
+permissions:
+  hypereco.balance:
+    description: Check your own balance
+    default: true
+  hypereco.balance.others:
+    description: Check another player balance
+    default: op
+  hypereco.pay:
+    description: Send money to another player
+    default: true
+  hypereco.admin:
+    description: Administrative economy access
+    default: op
