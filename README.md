@@ -85,6 +85,29 @@ mvn clean package
 Drop the jar in `plugins/`, start the server once to generate `config.yml`,
 then adjust and run `/hyper reload` where supported.
 
+## Verification
+
+```bash
+./verify.sh          # builds, runs tests, checks bytecode version
+```
+
+**15 unit tests** cover the money arithmetic in `Ledger`, which is deliberately
+free of any Bukkit dependency so it can be tested directly.
+
+| Test | Guards against |
+|---|---|
+| `concurrentDepositsAreAtomic` | Lost updates under contention |
+| `concurrentWithdrawalsNeverOverdraw` | Races driving a balance negative |
+| `overflowRejected` | A wrapped `long` becoming free money |
+| `transferConservesSupply` | Currency created or destroyed in transit |
+| `overflowingTransferRefunds` | A failed credit vanishing the amount |
+| `rejectedMutationIsNotPersisted` | A no-op scheduling a pointless write |
+
+These were validated by mutation: replacing the atomic `map.compute()` with a
+read-modify-write makes `concurrentDepositsAreAtomic` fail with
+`expected: <80000> but was: <23060>` — 57,000 units silently destroyed. That is
+the exact bug the test exists to catch.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
